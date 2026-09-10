@@ -1,0 +1,207 @@
+\input{../../latex/preamble.tex}
+
+\title{Introducción a ML \\ y Probabilidad/Estadística}
+\subtitle{¿Qué es aprender de datos? Matemática básica}
+\date{}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\part{Introducción a Machine Learning}
+\frame{\partpage}
+
+\section{¿Qué es Machine Learning?}
+
+\begin{frame}{¿Qué es Machine Learning?}
+  \definicion{
+    El machine learning es un subconjunto de la inteligencia artificial centrado en algoritmos que pueden \textbf{aprender} los patrones de los datos de entrenamiento y hacer inferencias precisas sobre nuevos datos.
+  }
+  \pause
+  En vez de escribir reglas a mano, le mostramos ejemplos al modelo
+  y este \textbf{aprende un patrón} que generaliza a casos nuevos.
+\end{frame}
+
+\begin{frame}{Programación tradicional vs. ML}
+  \begin{columns}
+    \column{0.5\textwidth}
+    \textbf{Programación tradicional}
+    \begin{itemize}
+      \item Le damos datos y definimos reglas. Eso nos da \textit{resultados}
+      \item Nosotros escribimos la lógica
+    \end{itemize}
+    \column{0.5\textwidth}
+    \textbf{Machine Learning}
+    \begin{itemize}
+      \item Le damos datos y resultados. Eso nos da \textit{reglas}
+      \item El modelo aprende la lógica
+    \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{¿Dónde se usa?}
+  \begin{itemize}
+    \item Recomendaciones (Netflix, Spotify, YouTube)
+    \item Detección de spam
+    \item Reconocimiento de imágenes y voz
+    \item Diagnóstico médico asistido
+    \item Autos autónomos
+    \item Traducción automática
+  \end{itemize}
+\end{frame}
+
+\section{Tipos de aprendizaje}
+
+\begin{frame}{Aprendizaje supervisado}
+  \definicion{
+    Aprendemos una función que asocia entradas a salidas, a partir de
+    ejemplos \textbf{etiquetados}.
+  }
+  \ejemplo{
+    Predecir el precio de una casa a partir de sus características
+    (m², ubicación, antigüedad), usando casas ya vendidas como ejemplo.
+  }
+  Se suelen usar en dos tipos de problemas: \textbf{clasificación} (categorías) y
+  \textbf{regresión} (valores numéricos continuos).
+\end{frame}
+
+\begin{frame}{Aprendizaje no supervisado}
+  \definicion{
+    Buscamos patrones o estructura en datos \textbf{sin etiquetas}.
+  }
+  \ejemplo{
+    Agrupar clientes de una tienda según sus hábitos de compra, sin
+    saber de antemano qué grupos existen (clustering).
+  }
+\end{frame}
+
+\begin{frame}{Aprendizaje por refuerzo}
+  \definicion{
+    Un agente aprende a tomar decisiones interactuando con un entorno,
+    recibiendo recompensas o castigos.
+  }
+  \ejemplo{
+    Un programa que aprende a jugar al go o a un videojuego
+    jugando muchas partidas contra sí mismo.
+  }
+\end{frame}
+
+\section{Flujo de trabajo en ML}
+
+\begin{frame}{¿Cómo es el flujo de trabajo en un proyecto de ML?}
+  ¿Cómo se imaginan que trabaja un ingeniero de ML?
+  \pause
+  \begin{enumerate}
+    \item Definir el problema
+    \item Recolectar y explorar los datos
+    \item Preprocesar los datos (limpieza, transformación)
+    \item Elegir un modelo y entrenarlo
+    \item Evaluar el modelo
+    \item Ajustar (iterar) y poner en producción
+  \end{enumerate}
+  \pause
+  \importante{
+    La mayor parte del tiempo real de un proyecto de ML se va en los
+    datos, no en el modelo.
+  }
+\end{frame}
+
+\begin{frame}{Palabras que van a escuchar mucho}
+  \begin{itemize}
+    \item \textbf{Dataset}: conjunto de datos con los que trabajamos
+    \item \textbf{Feature}: cada variable de entrada
+    \item \textbf{Target (etiqueta)}: lo que queremos predecir
+    \item \textbf{Modelo}: la función/algoritmo que aprende el patrón
+    \item \textbf{Entrenamiento}: proceso de ajustar el modelo a los datos
+    \item \textbf{Overfitting}: el modelo memoriza en vez de generalizar
+  \end{itemize}
+\end{frame}
+
+\part{Probabilidad y Estadística para ML}
+\frame{\partpage}
+
+\section{¿Por qué estadística en ML?}
+
+\begin{frame}{¿Por qué necesitamos estadística?}
+  \importante{
+    ML (y la computación en general) es, en el fondo, matemática aplicada a gran escala. Todo dataset
+    es una muestra, y todo modelo hace operaciones estadísticas sobre esa muestra.
+  }
+  \begin{itemize}
+    \item Para \textbf{entender} los datos antes de modelar (¿hay outliers? ¿están sesgados?)
+    \item Para \textbf{elegir} qué transformar y cómo
+    \item Para \textbf{interpretar} si un resultado es significativo o casualidad
+  \end{itemize}
+\end{frame}
+
+\section{Medidas de tendencia central y dispersión}
+
+\begin{frame}{Medidas de tendencia central}
+  \begin{itemize}
+    \item \textbf{Media ($\bar{x}$)}: promedio de los valores
+      $$\bar{x} = \frac{1}{n}\sum_{i=1}^{n} x_i$$
+    \item \textbf{Mediana}: valor que queda en el medio al ordenar los datos
+    \item \textbf{Moda}: valor más frecuente
+  \end{itemize}
+  \pause
+  \ejemplo{
+    Sueldos: 1, 1, 2, 2, 2, 100 (en cientos de miles).
+    Media $\approx 18$, mediana $= 2$, moda $= 2$.
+    La media se deja engañar por valores extremos, la mediana no.
+  }
+\end{frame}
+
+\begin{frame}{Medidas de dispersión}
+  \begin{itemize}
+    \item \textbf{Varianza}: qué tan lejos están los datos de la media, en promedio (al cuadrado)
+      $$\sigma^2 = \frac{1}{n}\sum_{i=1}^{n} (x_i - \bar{x})^2$$
+    \item \textbf{Desvío estándar}: $\sigma = \sqrt{\sigma^2}$, en las mismas unidades que los datos
+  \end{itemize}
+  \pause
+  \importante{
+    Un desvío estándar grande dice que los datos están muy dispersos!
+    La media sola no alcanza para describir un dataset.
+  }
+\end{frame}
+
+\section{Distribuciones y correlación}
+
+\begin{frame}{La distribución normal}
+  \begin{itemize}
+    \item Forma de \textbf{campana}, simétrica alrededor de la media
+    \item Muchísimos fenómenos naturales se aproximan a esta forma (alturas, errores de medición)
+    \item Muchos algoritmos de ML \textbf{asumen} (implícita o explícitamente) que las variables se comportan así
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Probabilidad: lo mínimo indispensable}
+  \begin{itemize}
+    \item \textbf{Probabilidad}: número entre 0 y 1 que mide qué tan posible es un evento
+    \item \textbf{Probabilidad condicional} $P(A \mid B)$: probabilidad de $A$ sabiendo que $B$ ya ocurrió
+  \end{itemize}
+  \ejemplo{
+    $P(\text{spam})$ = probabilidad general de que un mail sea spam.\\
+    $P(\text{spam} \mid \text{contiene ``gratis''})$ = probabilidad de spam
+    \emph{sabiendo} que el mail contiene la palabra ``gratis''. Mucho más útil.
+  }
+\end{frame}
+
+\begin{frame}{Correlación}
+  \definicion{
+    La correlación mide qué tan relacionadas están dos variables
+    numéricas, con un valor entre $-1$ y $1$.
+  }
+  \begin{itemize}
+    \item Cerca de $1$: cuando una sube, la otra también (relación positiva)
+    \item Cerca de $-1$: cuando una sube, la otra baja (relación negativa)
+    \item Cerca de $0$: no hay relación lineal aparente
+  \end{itemize}
+  \importante{Correlación no implica causalidad.}
+\end{frame}
+
+\begin{frame}{Resumen de la clase}
+  \centering
+  \Large ¿Preguntas?
+\end{frame}
+
+\end{document}

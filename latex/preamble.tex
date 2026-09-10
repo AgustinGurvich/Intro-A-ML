@@ -1,0 +1,47 @@
+% Preámbulo compartido para todas las clases de Beamer.
+% Cada clase lo incluye con \input{../../latex/preamble.tex}
+
+\documentclass[aspectratio=169,11pt]{beamer}
+
+\usetheme{Madrid}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue},
+  commentstyle=\color{gray},
+  stringstyle=\color{teal},
+  showstringspaces=false,
+  breaklines=true,
+  frame=single
+}
+
+\newcommand{\definicion}[1]{%
+  \begin{block}{Definición}
+    #1
+  \end{block}
+}
+
+\newcommand{\ejemplo}[1]{%
+  \begin{exampleblock}{Ejemplo}
+    #1
+  \end{exampleblock}
+}
+
+\newcommand{\importante}[1]{%
+  \begin{alertblock}{Importante}
+    #1
+  \end{alertblock}
+}
+
+\author{Agustín Gurvich}
+\institute{Introducción a Machine Learning}
