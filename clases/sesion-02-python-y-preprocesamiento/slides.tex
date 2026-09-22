@@ -1,0 +1,262 @@
+\input{../../latex/preamble.tex}
+
+\title{Python Científico y Preprocesamiento de Datos}
+\subtitle{numpy, pandas, matplotlib y preparar datos para un modelo}
+\date{}
+
+\begin{document}
+
+\frame{\titlepage}
+
+
+\part{Python científico}
+\frame{\partpage}
+
+\section{¿Por qué no alcanza con Python puro?}
+
+\begin{frame}{¿Por qué no alcanza con Python puro?}
+  \begin{itemize}
+    \item Las listas de Python no fueron pensadas para hacer cuentas con miles o millones de números
+    \item Para trabajar con datos en serio usamos tres librerías:
+  \end{itemize}
+  \begin{itemize}
+    \item \textbf{numpy}: vectores y matrices de números
+    \item \textbf{pandas}: tablas (filas y columnas)
+    \item \textbf{matplotlib}: gráficos
+  \end{itemize}
+  \pause
+  \importante{
+    Casi toda librería de ML en Python, incluyendo scikit-learn, está
+    construida arriba de numpy y pandas.
+  }
+\end{frame}
+
+\section{numpy}
+
+\begin{frame}[fragile]{numpy: arrays}
+  \definicion{
+    Un array de numpy es una lista de números que se puede operar
+    directamente, sin escribir loops.
+  }
+  \begin{lstlisting}[language=Python]
+import numpy as np
+
+x = np.array([1, 2, 3, 4])
+x * 2
+# array([2, 4, 6, 8])
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{numpy: operaciones sin loops}
+  \begin{lstlisting}[language=Python]
+edades = np.array([15, 16, 17, 18, 17])
+
+edades.mean()   # 16.6
+edades.std()    # desvio estandar
+edades.max()    # 18
+edades[edades > 16]   # array([17, 18, 17])
+  \end{lstlisting}
+  \pause
+  \importante{
+    Nada de \texttt{for}. Estas operaciones se aplican a todo el array de una,
+    y son mucho más rápidas que un loop escrito a mano.
+  }
+\end{frame}
+
+\section{pandas}
+
+\begin{frame}[fragile]{pandas: DataFrames}
+  \definicion{
+    Un DataFrame es una tabla: filas y columnas, con nombres, donde cada
+    columna puede tener un tipo de dato distinto (números, texto, fechas).
+  }
+  \begin{lstlisting}[language=Python]
+import pandas as pd
+
+df = pd.read_csv("datos.csv")
+df.head()   # primeras 5 filas
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{pandas: elegir y filtrar}
+  \begin{lstlisting}[language=Python]
+df["edad"]                    # una columna
+df[["edad", "nota"]]          # varias columnas
+
+df[df["edad"] > 17]           # filas que cumplen una condicion
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{pandas: funciones que van a usar seguido}
+  \begin{itemize}
+    \item \texttt{df.info()}: tipos de datos y valores faltantes
+    \item \texttt{df.describe()}: media, desvío, mínimo, máximo de cada columna
+    \item \texttt{df.groupby("columna")}: agrupar filas por un valor
+    \item \texttt{df.sort\_values("columna")}: ordenar
+  \end{itemize}
+\end{frame}
+
+\section{matplotlib}
+
+\begin{frame}[fragile]{matplotlib: visualizar}
+  \begin{lstlisting}[language=Python]
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots()
+ax.scatter(df["edad"], df["nota"])
+plt.show()
+  \end{lstlisting}
+  \pause
+  \texttt{fig} es el lienzo entero, \texttt{ax} es donde se dibuja. Ya lo
+  probamos con el dataset Iris.
+\end{frame}
+
+\begin{frame}{Resumen: numpy, pandas, matplotlib}
+  \begin{itemize}
+    \item numpy: cuentas rápidas sobre números, sin loops
+    \item pandas: tablas, filtrar, agrupar, resumir
+    \item matplotlib: ver los datos antes y después de modelar
+  \end{itemize}
+\end{frame}
+
+\part{Preprocesamiento de datos}
+\frame{\partpage}
+
+\section{De datos crudos a datos usables}
+
+\begin{frame}{De datos a datos usables}
+  \importante{
+    Ningún modelo entrena bien con datos sucios. En un proyecto real,
+    esta parte suele llevar más tiempo que elegir y entrenar el modelo.
+  }
+  Antes de entrenar cualquier cosa hay que resolver al menos tres
+  problemas típicos:
+  \begin{enumerate}
+    \item Datos faltantes
+    \item Variables que no son números (categóricas)
+    \item Variables en escalas muy distintas
+  \end{enumerate}
+\end{frame}
+
+\section{Datos faltantes}
+
+\begin{frame}[fragile]{Datos faltantes}
+  \definicion{
+    Un dato faltante (\texttt{NaN}) es un valor que no se registró:
+    una encuesta sin responder, un sensor que falló, etc.
+  }
+  \begin{lstlisting}[language=Python]
+df.isna().sum()          # cuantos faltan por columna
+
+df.dropna()              # opcion 1: eliminar filas con faltantes
+df.fillna(df.mean())     # opcion 2: completar con la media
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}{Datos faltantes: ¿eliminar o completar?}
+  \begin{itemize}
+    \item Eliminar filas: fácil, pero se pierde información si hay muchos faltantes
+    \item Completar con la media/mediana: mantiene el tamaño del dataset, pero "inventa" un valor
+  \end{itemize}
+  \pause
+  No hay una respuesta única, depende de cuántos datos falten y de qué
+  tan importante sea esa columna.
+\end{frame}
+
+\section{Variables categóricas}
+
+\begin{frame}{Variables categóricas}
+  \definicion{
+    Columnas con categorías en vez de números: color, ciudad, tipo de
+    producto.
+  }
+  \importante{
+    Los modelos de ML trabajan con números. Una columna de texto hay que
+    convertirla antes de entrenar.
+  }
+\end{frame}
+
+\begin{frame}[fragile]{One hot encoding}
+  Convierte cada categoría en una columna nueva de ceros y unos.
+  \begin{lstlisting}[language=Python]
+pd.get_dummies(df, columns=["color"])
+  \end{lstlisting}
+  \begin{center}
+  \begin{tabular}{lccc}
+    \toprule
+    color & color\_rojo & color\_verde & color\_azul \\
+    \midrule
+    rojo & 1 & 0 & 0 \\
+    verde & 0 & 1 & 0 \\
+    azul & 0 & 0 & 1 \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+\end{frame}
+
+\section{Escalado de variables}
+
+\begin{frame}{Escalado de variables}
+  \ejemplo{
+    Un dataset con \texttt{edad} (0 a 100) y \texttt{sueldo} (0 a
+    1.000.000). Para el modelo, una diferencia de sueldo de 10.000 "pesa"
+    mucho más que una diferencia de edad de 10 años, solo porque el
+    número es más grande.
+  }
+  \pause
+  \definicion{
+    Escalar significa transformar las variables numéricas para que
+    queden en rangos comparables entre sí.
+  }
+\end{frame}
+
+\begin{frame}[fragile]{Escalado: StandardScaler}
+  \begin{lstlisting}[language=Python]
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+X_escalado = scaler.fit_transform(X)
+  \end{lstlisting}
+  Cada columna queda con media 0 y desvío estándar 1. Ninguna variable
+  domina a las demás solo por su escala original.
+\end{frame}
+
+\section{Train / test split}
+
+\begin{frame}{Train / test split}
+  \definicion{
+    Separar el dataset en dos partes: una para entrenar el modelo
+    (\textit{train}) y otra que el modelo nunca ve durante el
+    entrenamiento (\textit{test}), para evaluarlo después.
+  }
+  \pause
+  \importante{
+    Evaluar un modelo con los mismos datos que usó para entrenar es como
+    corregir un examen dándole las respuestas al alumno antes de
+    tomarlo.
+  }
+\end{frame}
+
+\begin{frame}[fragile]{Train / test split en código}
+  \begin{lstlisting}[language=Python]
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=0
+)
+  \end{lstlisting}
+  Una división típica: 70\% para entrenar, 30\% para evaluar.
+\end{frame}
+
+\begin{frame}{Resumen}
+  \begin{itemize}
+    \item numpy, pandas y matplotlib son la base para manipular y ver datos
+    \item Faltantes, categóricas y escalado hay que resolverlos antes de entrenar
+    \item El test set se separa antes de entrenar y no se toca hasta evaluar
+  \end{itemize}
+  \vspace{1em}
+  \centering
+  \Large ¿Preguntas?
+\end{frame}
+
+\end{document}
