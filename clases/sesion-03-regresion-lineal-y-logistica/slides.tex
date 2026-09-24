@@ -1,0 +1,254 @@
+\input{../../latex/preamble.tex}
+
+\title{Sesión 3: Regresión Lineal y Logística}
+\subtitle{De predecir números a clasificar categorías}
+\date{}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\part{Regresión lineal}
+\frame{\partpage}
+
+\section{¿Qué es regresión lineal?}
+
+\begin{frame}{¿Qué es regresión lineal?}
+  \definicion{
+    Un modelo que predice un valor \textbf{numérico continuo} a partir de
+    una combinación lineal de las variables de entrada.
+  }
+  \ejemplo{
+    Precio de una casa a partir de sus m², cantidad de ambientes y
+    antigüedad. El precio puede ser cualquier número, no una categoría.
+  }
+  Es el primer modelo que vamos a entrenar a full.
+\end{frame}
+
+\section{Regresión lineal simple}
+
+\begin{frame}{La recta que mejor ajusta}
+  Con una sola variable de entrada $x$, buscamos la recta
+  $$\hat{y} = w x + b$$
+  \begin{itemize}
+    \item $w$: pendiente, cuánto cambia $\hat{y}$ por cada unidad de $x$
+    \item $b$: ordenada al origen, valor de $\hat{y}$ cuando $x = 0$
+  \end{itemize}
+  ``Entrenar'' el modelo es eso: encontrar los valores de $w$ y
+  $b$ que mejor ajustan a los datos.
+\end{frame}
+
+\begin{frame}{¿Qué significa ``mejor ajusta''?}
+  \definicion{
+    El \textbf{error cuadrático medio} (MSE) mide qué tan lejos están las
+    predicciones del modelo de los valores reales.
+    $$\text{MSE} = \frac{1}{n}\sum_{i=1}^{n} (y_i - \hat{y}_i)^2$$
+  }
+  Elevamos al cuadrado para que errores positivos y negativos no se
+  cancelen entre sí, y para penalizar más los errores grandes. Entrenar es
+  buscar el $w$ y el $b$ que minimizan el MSE.
+\end{frame}
+
+\section{Descenso de gradiente}
+
+\begin{frame}{¿Cómo encontramos el mínimo?}
+  \begin{enumerate}
+    \item Empezar con $w$ y $b$ al azar (predicciones malas)
+    \item Medir el error
+    \item Mover $w$ y $b$ un poquito en la dirección que lo reduce
+    \item Repetir hasta que el error deje de bajar
+  \end{enumerate}
+  \pause
+  \ejemplo{
+    ¿Y cómo salimos de este pozo? Pues cavando.
+  }
+\end{frame}
+
+\begin{frame}{Learning rate}
+  \begin{itemize}
+    \item Controla el tamaño de cada paso del descenso de gradiente
+    \item Muy chico: converge, pero tarda muchísimas iteraciones
+    \item Muy grande: puede pasarse del mínimo y no converger nunca
+  \end{itemize}
+  \pause
+  \importante{
+    Nada de esto se programa a mano: scikit-learn ya lo resuelve,
+    y de forma más eficiente que cualquier loop que escribamos nosotros.
+  }
+\end{frame}
+
+\section{Regresión lineal múltiple}
+
+\begin{frame}{Más de una variable}
+  En un problema real casi siempre hay varias features. La idea es la
+  misma, con un coeficiente por cada una:
+  $$\hat{y} = w_1 x_1 + w_2 x_2 + \dots + w_n x_n + b$$
+  \ejemplo{
+    Precio $=$ $w_1 \cdot$ m² $+ w_2 \cdot$ ambientes $+ w_3 \cdot$
+    antigüedad $+ b$
+  }
+\end{frame}
+
+\begin{frame}{Interpretando los coeficientes}
+  \begin{itemize}
+    \item Coeficiente grande y positivo: esa variable empuja fuerte la
+      predicción para arriba
+    \item Coeficiente negativo: la empuja para abajo
+    \item Coeficiente cercano a 0: esa variable casi no influye
+  \end{itemize}
+  \pause
+  Ojo: si las variables están en escalas muy distintas, comparar
+  coeficientes a simple vista engaña. Por eso escalamos antes de entrenar!
+\end{frame}
+
+\section{Evaluando el ajuste}
+
+\begin{frame}{$R^2$: coeficiente de determinación}
+  \definicion{
+    Mide qué proporción de la variabilidad de $y$ explica el modelo. Va de
+    $-\infty$ a $1$.
+  }
+  \begin{itemize}
+    \item $R^2 = 1$: predicciones perfectas
+    \item $R^2 = 0$: el modelo predice tan bien como usar siempre el
+      promedio de $y$
+    \item $R^2 < 0$: el modelo es peor que predecir el promedio
+  \end{itemize}
+\end{frame}
+
+\section{Regresión lineal en código}
+
+\begin{frame}[fragile]{Regresión lineal con scikit-learn}
+  \begin{lstlisting}[language=Python]
+from sklearn.linear_model import LinearRegression
+
+modelo = LinearRegression()
+modelo.fit(X_train, y_train)
+
+modelo.coef_        # los w_i
+modelo.intercept_   # el b
+
+modelo.predict(X_test)
+modelo.score(X_test, y_test)   # R^2
+  \end{lstlisting}
+\end{frame}
+
+\part{Regresión logística}
+\frame{\partpage}
+
+\section{De regresión a clasificación}
+
+\begin{frame}{El problema: clasificar, no predecir un número}
+  \ejemplo{
+    Si un mail es spam o no, si un tumor es maligno o benigno, si un
+    cliente deja de pagar o no. La salida es una \textbf{categoría}, no un
+    número continuo.
+  }
+  ¿Por qué no usar regresión lineal directamente, prediciendo 0 o 1?
+  \pause
+  \importante{
+    Porque puede devolver cualquier número: $-3$, $1.7$, $250$. Eso no se
+    interpreta como ``sí'' o ``no'', y un solo outlier corre toda la
+    recta.
+  }
+\end{frame}
+
+\section{La función sigmoide}
+
+\begin{frame}{La función sigmoide}
+  \definicion{
+    Aplasta cualquier número real al rango $(0, 1)$.
+    $$\sigma(z) = \frac{1}{1 + e^{-z}}$$
+  }
+  \begin{itemize}
+    \item $z \to +\infty \Rightarrow \sigma(z) \to 1$
+    \item $z \to -\infty \Rightarrow \sigma(z) \to 0$
+    \item $z = 0 \Rightarrow \sigma(z) = 0.5$
+  \end{itemize}
+  Forma de ``S'': un número cualquiera entra, algo interpretable como
+  probabilidad sale.
+\end{frame}
+
+\section{Regresión logística: el modelo}
+
+\begin{frame}{Combinando todo}
+  Regresión lineal, pasada por la sigmoide:
+  $$\hat{p} = \sigma(w_1 x_1 + \dots + w_n x_n + b)$$
+  \definicion{
+    $\hat{p}$ se interpreta como la \textbf{probabilidad} de que la
+    observación sea de la clase positiva (por ejemplo, ``es spam'').
+  }
+\end{frame}
+
+\begin{frame}{De probabilidad a clase: el umbral}
+  \begin{itemize}
+    \item $\hat{p} \geq 0.5$: predecimos clase 1
+    \item $\hat{p} < 0.5$: predecimos clase 0
+  \end{itemize}
+  \pause
+  \importante{
+    $0.5$ es el umbral por defecto, no una ley física. En diagnóstico
+    médico, por ejemplo, conviene bajarlo para no dejar pasar casos
+    positivos, aunque eso traiga más falsos positivos.
+  }
+\end{frame}
+
+\section{Entrenamiento: log loss}
+
+\begin{frame}{¿Cómo se entrena?}
+  \definicion{
+    La función de costo acá es la \textbf{log loss}: penaliza fuerte
+    cuando el modelo está muy seguro y se equivoca.
+  }
+  \ejemplo{
+    Predecir $\hat{p} = 0.99$ para algo que en realidad es clase 0 sale
+    mucho más caro que predecir $\hat{p} = 0.6$ y fallar igual.
+  }
+\end{frame}
+
+\section{Más de dos clases}
+
+\begin{frame}{¿Y si hay más de dos categorías?}
+  \begin{itemize}
+    \item \textbf{One-vs-rest}: un clasificador binario por clase (``es
+      esta'' vs. ``no lo es''), se queda con el de mayor probabilidad
+    \item \textbf{Softmax}: generaliza la sigmoide a varias clases a la
+      vez, con probabilidades que suman 1
+  \end{itemize}
+  scikit-learn elige la estrategia solo, según el problema.
+\end{frame}
+
+\section{Regresión logística en código}
+
+\begin{frame}[fragile]{Regresión logística con scikit-learn}
+  \begin{lstlisting}[language=Python]
+from sklearn.linear_model import LogisticRegression
+
+modelo = LogisticRegression()
+modelo.fit(X_train, y_train)
+
+modelo.predict(X_test)          # clases predichas
+modelo.predict_proba(X_test)    # probabilidad por clase
+
+modelo.score(X_test, y_test)    # accuracy
+  \end{lstlisting}
+  \pause
+  \texttt{predict\_proba} es la gran diferencia frente a regresión lineal:
+  no solo da una clase, da qué tan segura está.
+\end{frame}
+
+\begin{frame}{Resumen}
+  \begin{itemize}
+    \item Regresión lineal: ajusta una recta (o hiperplano) minimizando el
+      error cuadrático medio
+    \item Regresión logística: la misma idea, pasada por una sigmoide, para
+      obtener una probabilidad
+    \item Ambas se entrenan con descenso de gradiente y comparten la
+      interfaz \texttt{fit} / \texttt{predict} de scikit-learn
+  \end{itemize}
+  \vspace{1em}
+  \centering
+  \Large ¿Preguntas?
+\end{frame}
+
+\end{document}
